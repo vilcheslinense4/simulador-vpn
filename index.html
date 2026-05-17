@@ -55,7 +55,7 @@
             font-size: 0.85rem;
             transition: color 0.2s;
         }
-        .btn-volver:hover { color: #ff006e; }
+        .btn-volver:hover { color: #00d2ff; }
 
         /* Escudo de Estado */
         .status-box {
@@ -102,6 +102,7 @@
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             z-index: 5;
+            outline: none;
         }
 
         .power-btn svg {
@@ -111,7 +112,14 @@
             transition: all 0.5s ease;
         }
 
-        /* Animación cuando la VPN está CONECTADA */
+        /* Estados dinámicos por JS */
+        .power-btn.connecting {
+            border-color: #eab308;
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.4);
+            animation: pulse-yellow 1s infinite alternate;
+        }
+        .power-btn.connecting svg { fill: #eab308; }
+
         .power-btn.connected {
             border-color: #00d2ff;
             box-shadow: 0 0 50px rgba(0, 210, 255, 0.4), inset 0 0 20px rgba(0, 210, 255, 0.3);
@@ -119,6 +127,11 @@
         }
         .power-btn.connected svg { fill: #00d2ff; filter: drop-shadow(0 0 8px #00d2ff); }
         .power-btn:active { transform: scale(0.95); }
+
+        @keyframes pulse-yellow {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.03); opacity: 1; }
+        }
 
         /* Onda expansiva de carga */
         .pulse-ring {
@@ -134,12 +147,12 @@
         .pulse-ring.animating { animation: ripple 1.5s infinite linear; }
         @keyframes ripple {
             0% { transform: scale(1); opacity: 0.5; }
-            100% { transform: scale(1.5); opacity: 0; }
+            100% { transform: scale(1.6); opacity: 0; }
         }
 
         /* Cronómetro */
-        #timer { font-size: 1.1rem; opacity: 0.5; font-weight: 500; margin-top: -15px; margin-bottom: 30px; font-family: monospace; }
-        #timer.active { opacity: 1; color: #00d2ff; }
+        #timer { font-size: 1.1rem; opacity: 0.4; font-weight: 500; margin-top: -15px; margin-bottom: 30px; font-family: monospace; transition: opacity 0.3s; }
+        #timer.active { opacity: 1; color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.3); }
 
         /* Selector de Ubicación */
         .location-selector {
@@ -182,6 +195,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             padding: 12px;
+            transition: all 0.3s;
         }
         .stat-card span { display: block; font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px; }
         .stat-card p { font-size: 1.1rem; font-weight: bold; color: #f4f7f6; }
@@ -241,7 +255,144 @@
     </div>
 
     <script>
-        console.log("Simulador VPN: Interfaz lista.");
+        // Configuración de datos simulados por país
+        const paisesConfig = {
+            us: { nombre: 'Estados Unidos', bandera: '🇺🇸', pingBase: 140 },
+            de: { nombre: 'Alemania', bandera: '🇩🇪', pingBase: 42 },
+            jp: { nombre: 'Japón', bandera: '🇯🇵', pingBase: 290 },
+            uk: { nombre: 'Reino Unido', bandera: '🇬🇧', pingBase: 55 },
+            is: { nombre: 'Islandia', bandera: '🇮🇸', pingBase: 110 }
+        };
+
+        // Guardamos la IP real "falsa" para cuando esté apagado
+        const IP_REAL = "185.124.74.22";
+
+        // DOM Elements
+        const vpnToggle = document.getElementById('vpn-toggle');
+        const pulseRing = document.getElementById('pulse');
+        const statusCard = document.getElementById('status-card');
+        const statusText = document.getElementById('status-text');
+        const ipDisplay = document.getElementById('ip-display');
+        const serverSelect = document.getElementById('server-select');
+        const countryFlag = document.getElementById('country-flag');
+        const countryName = document.getElementById('country-name');
+        const pingDisplay = document.getElementById('ping-display');
+        const cipherDisplay = document.getElementById('cipher-display');
+        const timerDisplay = document.getElementById('timer');
+
+        // Estado interno de la VPN
+        let state = "disconnected"; // disconnected | connecting | connected
+        let timerInterval = null;
+        let totalSeconds = 0;
+
+        // Función para generar una IP aleatoria creíble
+        function generarIpFalsa() {
+            return `${Math.floor(Math.random() * 220) + 10}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}`;
+        }
+
+        // Función para generar pequeñas fluctuaciones en el Ping
+        function actualizarPingVisual(codigoPais) {
+            const base = paisesConfig[codigoPais].pingBase;
+            const fluctuacion = Math.floor(Math.random() * 11) - 5; // +/- 5ms
+            pingDisplay.innerText = `${base + fluctuacion} ms`;
+        }
+
+        // Manejo del Cronómetro
+        function startTimer() {
+            totalSeconds = 0;
+            timerDisplay.innerText = "00:00:00";
+            timerDisplay.classList.add('active');
+            
+            timerInterval = setInterval(() => {
+                totalSeconds++;
+                let hrs = Math.floor(totalSeconds / 3600);
+                let mins = Math.floor((totalSeconds - (hrs * 3600)) / 60);
+                let secs = totalSeconds % 60;
+
+                if (hrs < 10) hrs = "0" + hrs;
+                if (mins < 10) mins = "0" + mins;
+                if (secs < 10) secs = "0" + secs;
+
+                timerDisplay.innerText = `${hrs}:${mins}:${secs}`;
+                
+                // Aprovechamos el tick del reloj para fluctuar el ping sutilmente
+                if (state === "connected") {
+                    actualizarPingVisual(serverSelect.value);
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerDisplay.classList.remove('active');
+        }
+
+        // Evento: Clic en el Botón Central
+        vpnToggle.addEventListener('click', () => {
+            if (state === "disconnected") {
+                // PASO 1: Conectando (Animación de carga)
+                state = "connecting";
+                vpnToggle.classList.add('connecting');
+                statusText.innerText = "Negociando túnel...";
+                statusText.className = ""; // Quita color rosa
+                statusText.style.color = "#eab308"; // Color amarillo provisional
+
+                setTimeout(() => {
+                    if (state !== "connecting") return; // Por si cancela a mitad
+                    
+                    // PASO 2: ¡Conectado con éxito!
+                    state = "connected";
+                    vpnToggle.className = "power-btn connected";
+                    pulseRing.classList.add('animating');
+                    
+                    statusCard.className = "status-box protected";
+                    statusText.innerText = "Conexión Cifrada / Protegido";
+                    statusText.className = "text-cyan";
+                    statusText.style.color = ""; // Limpia estilo en línea
+                    
+                    ipDisplay.innerText = generarIpFalsa();
+                    cipherDisplay.innerText = "AES-256-GCM (Militar)";
+                    
+                    startTimer();
+                }, 1800); // 1.8 segundos de carga para hacerlo realista
+
+            } else if (state === "connected" || state === "connecting") {
+                // PASO 3: Apagar / Desconectar
+                state = "disconnected";
+                vpnToggle.className = "power-btn";
+                pulseRing.className = "pulse-ring"; // Quita animación
+                
+                statusCard.className = "status-box unprotected";
+                statusText.innerText = "Conexión Desprotegida";
+                statusText.className = "text-red";
+                statusText.style.color = "";
+                
+                ipDisplay.innerText = IP_REAL;
+                cipherDisplay.innerText = "Ninguno (AES-0)";
+                
+                stopTimer();
+                actualizarPingVisual(serverSelect.value);
+            }
+        });
+
+        // Evento: Cambiar de País en el menú
+        serverSelect.addEventListener('change', (e) => {
+            const codigo = e.target.value;
+            const info = paisesConfig[codigo];
+
+            // Cambiar textos y banderas al instante
+            countryFlag.innerText = info.bandera;
+            countryName.innerText = info.nombre;
+            actualizarPingVisual(codigo);
+
+            // Si la VPN está encendida, simula que saltas de servidor cambiando la IP
+            if (state === "connected") {
+                ipDisplay.innerText = generarIpFalsa();
+            }
+        });
+
+        // Inicializar el ping del primer país de la lista al cargar la web
+        actualizarPingVisual('us');
     </script>
 </body>
 </html>
