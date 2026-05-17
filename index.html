@@ -207,7 +207,7 @@
     <div class="vpn-container">
         <header>
             <span class="logo">🛡️ SHIELD vpn</span>
-            <a href="https://vilcheslinense4.github.io/mi-primer-portafolios/" class="btn-volver">← Salir</a>
+            <a href="https://vilcheslinense4.github.io/mi-primer-portafolios/" class="btn-volver">← Volver al portafolio</a>
         </header>
 
         <div id="status-card" class="status-box unprotected">
@@ -271,7 +271,6 @@
 
         const IP_REAL = "185.124.74.22";
 
-        // DOM Elements
         const vpnToggle = document.getElementById('vpn-toggle');
         const pulseRing = document.getElementById('pulse');
         const statusCard = document.getElementById('status-card');
@@ -286,7 +285,6 @@
         const timerDisplay = document.getElementById('timer');
         const consoleLog = document.getElementById('console-log');
 
-        // Audios
         const sndClick = document.getElementById('snd-click');
         const sndConnect = document.getElementById('snd-connect');
         const sndSuccess = document.getElementById('snd-success');
@@ -299,15 +297,13 @@
             return `${Math.floor(Math.random() * 220) + 10}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}`;
         }
 
-        // Añade líneas animadas a la consola inferior
         function printLog(text, type = "") {
             const line = document.createElement('div');
             line.className = `console-line ${type}`;
             line.innerText = `> ${text}`;
             consoleLog.appendChild(line);
-            consoleLog.scrollTop = consoleLog.scrollHeight; // Auto-scroll abajo
+            consoleLog.scrollTop = consoleLog.scrollHeight; 
             
-            // Mantener solo las últimas 3 líneas visibles
             while (consoleLog.children.length > 3) {
                 consoleLog.removeChild(consoleLog.firstChild);
             }
@@ -319,7 +315,6 @@
             pingDisplay.innerText = `${base + fluctuacion} ms`;
 
             if (state === "connected") {
-                // Simula velocidad variable de bajada tipo 120.4 Mbps
                 const speed = (Math.random() * (450 - 320) + 320).toFixed(1);
                 speedDisplay.innerText = `${speed} Mbps`;
             } else {
@@ -356,9 +351,8 @@
         }
 
         vpnToggle.addEventListener('click', () => {
-            // Reproduce click de sonido
             sndClick.currentTime = 0;
-            sndClick.play().catch(()=> {/* Evita error si el navegador bloquea audio */});
+            sndClick.play().catch(()=> {});
 
             if (state === "disconnected") {
                 state = "connecting";
@@ -367,7 +361,6 @@
                 statusText.className = ""; 
                 statusText.style.color = "#eab308"; 
 
-                // Efecto de audio de escaneo/conexión
                 sndConnect.currentTime = 0;
                 sndConnect.play().catch(()=>{});
 
@@ -390,7 +383,6 @@
                     ipDisplay.innerText = generarIpFalsa();
                     cipherDisplay.innerText = "AES-256-GCM (Militar)";
                     
-                    // Sonido de éxito
                     sndSuccess.currentTime = 0;
                     sndSuccess.play().catch(()=>{});
 
