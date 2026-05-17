@@ -200,9 +200,9 @@
 </head>
 <body>
 
-    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" preload="auto"></audio>
-    <audio id="snd-connect" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav" preload="auto"></audio>
-    <audio id="snd-success" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-84.wav" preload="auto"></audio>
+    <audio id="snd-click" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
+    <audio id="snd-connect" src="https://actions.google.com/sounds/v1/science_fiction/glitch.ogg" preload="auto"></audio>
+    <audio id="snd-success" src="https://actions.google.com/sounds/v1/science_fiction/alien_creature_teleport.ogg" preload="auto"></audio>
 
     <div class="vpn-container">
         <header>
@@ -351,13 +351,13 @@
         }
 
         vpnToggle.addEventListener('click', () => {
-            // Parche obligatorio para móviles: fuerza la carga e inicialización de las pistas de audio
+            // Asegurar activación en móviles
             sndClick.load();
             sndConnect.load();
             sndSuccess.load();
 
             sndClick.currentTime = 0;
-            sndClick.play().catch((err)=> console.log("Bloqueo audio click:", err));
+            sndClick.play().catch((err)=> console.log("Audio desactivado:", err));
 
             if (state === "disconnected") {
                 state = "connecting";
@@ -366,8 +366,10 @@
                 statusText.className = ""; 
                 statusText.style.color = "#eab308"; 
 
+                // Reducimos volumen para que el glitch no asuste
+                sndConnect.volume = 0.4;
                 sndConnect.currentTime = 0;
-                sndConnect.play().catch((err)=> console.log("Bloqueo audio connect:", err));
+                sndConnect.play().catch((err)=> console.log("Audio desactivado:", err));
 
                 printLog("Iniciando protocolo Shield...", "alert");
                 setTimeout(() => printLog("Buscando servidores en " + paisesConfig[serverSelect.value].nombre + "..."), 600);
@@ -388,8 +390,9 @@
                     ipDisplay.innerText = generarIpFalsa();
                     cipherDisplay.innerText = "AES-256-GCM (Militar)";
                     
+                    sndSuccess.volume = 0.4;
                     sndSuccess.currentTime = 0;
-                    sndSuccess.play().catch((err)=> console.log("Bloqueo audio success:", err));
+                    sndSuccess.play().catch((err)=> console.log("Audio desactivado:", err));
 
                     printLog("TÚNEL ESTABLECIDO CON ÉXITO.", "success");
                     printLog("Tráfico cifrado de extremo a extremo.", "success");
