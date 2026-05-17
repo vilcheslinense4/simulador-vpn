@@ -206,7 +206,7 @@
     <div class="vpn-container">
         <header>
             <span class="logo">🛡️ SHIELD vpn</span>
-            <a href="https://vilcheslinense4.github.io/Mi-primer-portafolios/" class="btn-volver">← Salir</a>
+            <a href="https://vilcheslinense4.github.io/mi-primer-portafolios/" class="btn-volver">← Salir</a>
         </header>
 
         <div id="status-card" class="status-box unprotected">
@@ -255,7 +255,6 @@
     </div>
 
     <script>
-        // Configuración de datos simulados por país
         const paisesConfig = {
             us: { nombre: 'Estados Unidos', bandera: '🇺🇸', pingBase: 140 },
             de: { nombre: 'Alemania', bandera: '🇩🇪', pingBase: 42 },
@@ -264,10 +263,8 @@
             is: { nombre: 'Islandia', bandera: '🇮🇸', pingBase: 110 }
         };
 
-        // Guardamos la IP real "falsa" para cuando esté apagado
         const IP_REAL = "185.124.74.22";
 
-        // DOM Elements
         const vpnToggle = document.getElementById('vpn-toggle');
         const pulseRing = document.getElementById('pulse');
         const statusCard = document.getElementById('status-card');
@@ -280,24 +277,20 @@
         const cipherDisplay = document.getElementById('cipher-display');
         const timerDisplay = document.getElementById('timer');
 
-        // Estado interno de la VPN
-        let state = "disconnected"; // disconnected | connecting | connected
+        let state = "disconnected"; 
         let timerInterval = null;
         let totalSeconds = 0;
 
-        // Función para generar una IP aleatoria creíble
         function generarIpFalsa() {
             return `${Math.floor(Math.random() * 220) + 10}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}`;
         }
 
-        // Función para generar pequeñas fluctuaciones en el Ping
         function actualizarPingVisual(codigoPais) {
             const base = paisesConfig[codigoPais].pingBase;
-            const fluctuacion = Math.floor(Math.random() * 11) - 5; // +/- 5ms
+            const fluctuacion = Math.floor(Math.random() * 11) - 5; 
             pingDisplay.innerText = `${base + fluctuacion} ms`;
         }
 
-        // Manejo del Cronómetro
         function startTimer() {
             totalSeconds = 0;
             timerDisplay.innerText = "00:00:00";
@@ -315,7 +308,6 @@
 
                 timerDisplay.innerText = `${hrs}:${mins}:${secs}`;
                 
-                // Aprovechamos el tick del reloj para fluctuar el ping sutilmente
                 if (state === "connected") {
                     actualizarPingVisual(serverSelect.value);
                 }
@@ -327,20 +319,17 @@
             timerDisplay.classList.remove('active');
         }
 
-        // Evento: Clic en el Botón Central
         vpnToggle.addEventListener('click', () => {
             if (state === "disconnected") {
-                // PASO 1: Conectando (Animación de carga)
                 state = "connecting";
                 vpnToggle.classList.add('connecting');
                 statusText.innerText = "Negociando túnel...";
-                statusText.className = ""; // Quita color rosa
-                statusText.style.color = "#eab308"; // Color amarillo provisional
+                statusText.className = ""; 
+                statusText.style.color = "#eab308"; 
 
                 setTimeout(() => {
-                    if (state !== "connecting") return; // Por si cancela a mitad
+                    if (state !== "connecting") return; 
                     
-                    // PASO 2: ¡Conectado con éxito!
                     state = "connected";
                     vpnToggle.className = "power-btn connected";
                     pulseRing.classList.add('animating');
@@ -348,19 +337,18 @@
                     statusCard.className = "status-box protected";
                     statusText.innerText = "Conexión Cifrada / Protegido";
                     statusText.className = "text-cyan";
-                    statusText.style.color = ""; // Limpia estilo en línea
+                    statusText.style.color = ""; 
                     
                     ipDisplay.innerText = generarIpFalsa();
                     cipherDisplay.innerText = "AES-256-GCM (Militar)";
                     
                     startTimer();
-                }, 1800); // 1.8 segundos de carga para hacerlo realista
+                }, 1800); 
 
             } else if (state === "connected" || state === "connecting") {
-                // PASO 3: Apagar / Desconectar
                 state = "disconnected";
                 vpnToggle.className = "power-btn";
-                pulseRing.className = "pulse-ring"; // Quita animación
+                pulseRing.className = "pulse-ring"; 
                 
                 statusCard.className = "status-box unprotected";
                 statusText.innerText = "Conexión Desprotegida";
@@ -375,23 +363,19 @@
             }
         });
 
-        // Evento: Cambiar de País en el menú
         serverSelect.addEventListener('change', (e) => {
             const codigo = e.target.value;
             const info = paisesConfig[codigo];
 
-            // Cambiar textos y banderas al instante
             countryFlag.innerText = info.bandera;
             countryName.innerText = info.nombre;
             actualizarPingVisual(codigo);
 
-            // Si la VPN está encendida, simula que saltas de servidor cambiando la IP
             if (state === "connected") {
                 ipDisplay.innerText = generarIpFalsa();
             }
         });
 
-        // Inicializar el ping del primer país de la lista al cargar la web
         actualizarPingVisual('us');
     </script>
 </body>
