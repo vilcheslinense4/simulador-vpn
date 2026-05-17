@@ -200,9 +200,9 @@
 </head>
 <body>
 
-    <audio id="snd-click" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
-    <audio id="snd-connect" src="https://actions.google.com/sounds/v1/science_fiction/glitch.ogg" preload="auto"></audio>
-    <audio id="snd-success" src="https://actions.google.com/sounds/v1/science_fiction/alien_creature_teleport.ogg" preload="auto"></audio>
+    <audio id="snd-click" src="https://themes.googleusercontent.com/image?id=17g5n4q8y-zTjUe7Z8oT3WnI-D-0pDq_F" preload="auto"></audio>
+    <audio id="snd-connect" src="https://raw.githubusercontent.com/twbs/icons/main/icons/activity.svg" preload="auto"></audio>
+    <audio id="snd-success" src="https://raw.githubusercontent.com/primer/octicons/main/icons/check-circle-fill-24.svg" preload="auto"></audio>
 
     <div class="vpn-container">
         <header>
@@ -285,13 +285,27 @@
         const timerDisplay = document.getElementById('timer');
         const consoleLog = document.getElementById('console-log');
 
-        const sndClick = document.getElementById('snd-click');
-        const sndConnect = document.getElementById('snd-connect');
-        const sndSuccess = document.getElementById('snd-success');
+        // Configuración usando la API nativa de síntesis de voz (Beeps electrónicos del navegador limpios y sin ficheros pesados)
+        function playBeep(freq, duration, type="sine") {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch(e) { console.log(e); }
+        }
 
         let state = "disconnected"; 
         let timerInterval = null;
         let totalSeconds = 0;
+        let connectingTimeout = null;
 
         function generarIpFalsa() {
             return `${Math.floor(Math.random() * 220) + 10}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}`;
@@ -351,13 +365,8 @@
         }
 
         vpnToggle.addEventListener('click', () => {
-            // Asegurar activación en móviles
-            sndClick.load();
-            sndConnect.load();
-            sndSuccess.load();
-
-            sndClick.currentTime = 0;
-            sndClick.play().catch((err)=> console.log("Audio desactivado:", err));
+            // Sonido de Click ultra corto (0.1s)
+            playBeep(600, 0.1, "square");
 
             if (state === "disconnected") {
                 state = "connecting";
@@ -366,16 +375,14 @@
                 statusText.className = ""; 
                 statusText.style.color = "#eab308"; 
 
-                // Reducimos volumen para que el glitch no asuste
-                sndConnect.volume = 0.4;
-                sndConnect.currentTime = 0;
-                sndConnect.play().catch((err)=> console.log("Audio desactivado:", err));
+                // Sonido sutil de carga (Bip de sistema rápido)
+                setTimeout(() => playBeep(880, 0.15), 100);
 
                 printLog("Iniciando protocolo Shield...", "alert");
                 setTimeout(() => printLog("Buscando servidores en " + paisesConfig[serverSelect.value].nombre + "..."), 600);
                 setTimeout(() => printLog("Negociando clave de cifrado Diffie-Hellman..."), 1200);
 
-                setTimeout(() => {
+                connectingTimeout = setTimeout(() => {
                     if (state !== "connecting") return; 
                     
                     state = "connected";
@@ -390,9 +397,9 @@
                     ipDisplay.innerText = generarIpFalsa();
                     cipherDisplay.innerText = "AES-256-GCM (Militar)";
                     
-                    sndSuccess.volume = 0.4;
-                    sndSuccess.currentTime = 0;
-                    sndSuccess.play().catch((err)=> console.log("Audio desactivado:", err));
+                    // Doble BIP rápido de éxito (Estilo dispositivo premium conectado)
+                    playBeep(1200, 0.08);
+                    setTimeout(() => playBeep(1500, 0.12), 80);
 
                     printLog("TÚNEL ESTABLECIDO CON ÉXITO.", "success");
                     printLog("Tráfico cifrado de extremo a extremo.", "success");
@@ -401,6 +408,9 @@
                 }, 1800); 
 
             } else if (state === "connected" || state === "connecting") {
+                // Cancelar cualquier temporizador de conexión si el usuario corta en medio de la carga
+                clearTimeout(connectingTimeout);
+                
                 state = "disconnected";
                 vpnToggle.className = "power-btn";
                 pulseRing.className = "pulse-ring"; 
@@ -415,6 +425,10 @@
                 
                 stopTimer();
                 actualizarDatosDinamicos(serverSelect.value);
+                
+                // Sonido grave descendente rápido de apagado
+                playBeep(400, 0.15, "sawtooth");
+
                 printLog("Conexión abortada por el usuario.", "alert");
                 printLog("Tu IP real vuelve a ser pública.", "alert");
             }
@@ -433,6 +447,7 @@
             if (state === "connected") {
                 ipDisplay.innerText = generarIpFalsa();
                 printLog("Nueva IP asignada en la región.", "success");
+                playBeep(900, 0.05);
             }
         });
 
