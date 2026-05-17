@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield VPN | Simulador</title>
+    <style>
+        /* ==========================================
+           ESTILOS BASE: ESTÉTICA HACKER / NEÓN
+           ========================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: #070b12;
+            background-image: 
+                radial-gradient(at 50% 0%, rgba(0, 210, 255, 0.15) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(255, 0, 110, 0.05) 0px, transparent 50%);
+            color: #f4f7f6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Contenedor Principal estilo Dashboard */
+        .vpn-container {
+            background: rgba(13, 20, 35, 0.75);
+            width: 100%;
+            max-width: 420px;
+            border-radius: 30px;
+            padding: 30px;
+            border: 1px solid rgba(0, 210, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            position: relative;
+        }
+
+        /* Cabecera */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo { font-weight: 800; font-size: 1.2rem; color: #00d2ff; letter-spacing: 1px; }
+        
+        .btn-volver {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+        .btn-volver:hover { color: #ff006e; }
+
+        /* Escudo de Estado */
+        .status-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.5s ease;
+        }
+        
+        /* Estado inicial: Desconectado / Peligro */
+        .status-box.unprotected { border-color: rgba(255, 0, 110, 0.3); box-shadow: inset 0 0 15px rgba(255, 0, 110, 0.1); }
+        /* Estado activo: Protegido */
+        .status-box.protected { border-color: rgba(0, 210, 255, 0.4); box-shadow: inset 0 0 25px rgba(0, 210, 255, 0.15); }
+
+        #status-text { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 5px; }
+        .text-red { color: #ff006e; text-shadow: 0 0 10px rgba(255, 0, 110, 0.4); }
+        .text-cyan { color: #00d2ff; text-shadow: 0 0 15px rgba(0, 210, 255, 0.5); }
+
+        #ip-display { font-size: 1.4rem; font-weight: 700; font-family: 'Courier New', Courier, monospace; letter-spacing: 1px; }
+
+        /* ==========================================
+           EL BOTÓN CENTRAL DE ENCENDIDO (POWER)
+           ========================================== */
+        .power-wrapper {
+            margin: 40px 0;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .power-btn {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: #0f172a;
+            border: 4px solid #ff006e;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.2), inset 0 0 15px rgba(255, 0, 110, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 5;
+        }
+
+        .power-btn svg {
+            width: 50px;
+            height: 50px;
+            fill: #ff006e;
+            transition: all 0.5s ease;
+        }
+
+        /* Animación cuando la VPN está CONECTADA */
+        .power-btn.connected {
+            border-color: #00d2ff;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.4), inset 0 0 20px rgba(0, 210, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .power-btn.connected svg { fill: #00d2ff; filter: drop-shadow(0 0 8px #00d2ff); }
+        .power-btn:active { transform: scale(0.95); }
+
+        /* Onda expansiva de carga */
+        .pulse-ring {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 2px solid #00d2ff;
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .pulse-ring.animating { animation: ripple 1.5s infinite linear; }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        /* Cronómetro */
+        #timer { font-size: 1.1rem; opacity: 0.5; font-weight: 500; margin-top: -15px; margin-bottom: 30px; font-family: monospace; }
+        #timer.active { opacity: 1; color: #00d2ff; }
+
+        /* Selector de Ubicación */
+        .location-selector {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 18px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .location-info { display: flex; align-items: center; gap: 12px; }
+        #country-flag { font-size: 1.6rem; }
+        .location-details { text-align: left; }
+        .location-details label { display: block; font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; }
+        #country-name { font-size: 0.95rem; font-weight: 600; }
+
+        select {
+            background: #0f172a;
+            color: white;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            padding: 6px 10px;
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* Características inferiores (Ping / Servidor) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 12px;
+        }
+        .stat-card span { display: block; font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-card p { font-size: 1.1rem; font-weight: bold; color: #f4f7f6; }
+    </style>
+</head>
+<body>
+
+    <div class="vpn-container">
+        <header>
+            <span class="logo">🛡️ SHIELD vpn</span>
+            <a href="https://vilcheslinense4.github.io/Mi-primer-portafolios/" class="btn-volver">← Salir</a>
+        </header>
+
+        <div id="status-card" class="status-box unprotected">
+            <p id="status-text" class="text-red">Conexión Desprotegida</p>
+            <p id="ip-display">185.124.74.22</p>
+        </div>
+
+        <div class="power-wrapper">
+            <div id="pulse" class="pulse-ring"></div>
+            <button id="vpn-toggle" class="power-btn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M11,6V12H13V6H11Z" />
+                </svg>
+            </button>
+        </div>
+
+        <p id="timer">00:00:00</p>
+
+        <div class="location-selector">
+            <div class="location-info">
+                <span id="country-flag">🇺🇸</span>
+                <div class="location-details">
+                    <label>Ubicación VPN</label>
+                    <span id="country-name">Estados Unidos</span>
+                </div>
+            </div>
+            <select id="server-select">
+                <option value="us">Estados Unidos</option>
+                <option value="de">Alemania</option>
+                <option value="jp">Japón</option>
+                <option value="uk">Reino Unido</option>
+                <option value="is">Islandia</option>
+            </select>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span>Latencia (Ping)</span>
+                <p id="ping-display">145 ms</p>
+            </div>
+            <div class="stat-card">
+                <span>Cifrado</span>
+                <p id="cipher-display">Ninguno (AES-0)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log("Simulador VPN: Interfaz lista.");
+    </script>
+</body>
+</html>
