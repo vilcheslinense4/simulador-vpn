@@ -351,8 +351,13 @@
         }
 
         vpnToggle.addEventListener('click', () => {
+            // Parche obligatorio para móviles: fuerza la carga e inicialización de las pistas de audio
+            sndClick.load();
+            sndConnect.load();
+            sndSuccess.load();
+
             sndClick.currentTime = 0;
-            sndClick.play().catch(()=> {});
+            sndClick.play().catch((err)=> console.log("Bloqueo audio click:", err));
 
             if (state === "disconnected") {
                 state = "connecting";
@@ -362,7 +367,7 @@
                 statusText.style.color = "#eab308"; 
 
                 sndConnect.currentTime = 0;
-                sndConnect.play().catch(()=>{});
+                sndConnect.play().catch((err)=> console.log("Bloqueo audio connect:", err));
 
                 printLog("Iniciando protocolo Shield...", "alert");
                 setTimeout(() => printLog("Buscando servidores en " + paisesConfig[serverSelect.value].nombre + "..."), 600);
@@ -384,7 +389,7 @@
                     cipherDisplay.innerText = "AES-256-GCM (Militar)";
                     
                     sndSuccess.currentTime = 0;
-                    sndSuccess.play().catch(()=>{});
+                    sndSuccess.play().catch((err)=> console.log("Bloqueo audio success:", err));
 
                     printLog("TÚNEL ESTABLECIDO CON ÉXITO.", "success");
                     printLog("Tráfico cifrado de extremo a extremo.", "success");
@@ -406,7 +411,7 @@
                 cipherDisplay.innerText = "AES-0 (Ninguno)";
                 
                 stopTimer();
-                actualizarDynamics(serverSelect.value);
+                actualizarDatosDinamicos(serverSelect.value);
                 printLog("Conexión abortada por el usuario.", "alert");
                 printLog("Tu IP real vuelve a ser pública.", "alert");
             }
