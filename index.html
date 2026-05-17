@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberShield VPN | Simulador</title>
+    <title>CyberShield VPN | Simulador Pro</title>
     <style>
         /* ==========================================
            ESTILOS BASE: ESTÉTICA HACKER / NEÓN
@@ -11,10 +11,10 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
         body {
-            background-color: #070b12;
+            background-color: #050811;
             background-image: 
-                radial-gradient(at 50% 0%, rgba(0, 210, 255, 0.15) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, rgba(255, 0, 110, 0.05) 0px, transparent 50%);
+                radial-gradient(at 50% 0%, rgba(0, 210, 255, 0.18) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(255, 0, 110, 0.08) 0px, transparent 50%);
             color: #f4f7f6;
             min-height: 100vh;
             display: flex;
@@ -26,15 +26,15 @@
 
         /* Contenedor Principal estilo Dashboard */
         .vpn-container {
-            background: rgba(13, 20, 35, 0.75);
+            background: rgba(10, 17, 30, 0.8);
             width: 100%;
             max-width: 420px;
             border-radius: 30px;
             padding: 30px;
-            border: 1px solid rgba(0, 210, 255, 0.15);
+            border: 1px solid rgba(0, 210, 255, 0.2);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
             text-align: center;
             position: relative;
         }
@@ -44,10 +44,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
-        .logo { font-weight: 800; font-size: 1.2rem; color: #00d2ff; letter-spacing: 1px; }
+        .logo { font-weight: 800; font-size: 1.2rem; color: #00d2ff; letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,210,255,0.4); }
         
         .btn-volver {
             color: rgba(255, 255, 255, 0.5);
@@ -59,17 +59,15 @@
 
         /* Escudo de Estado */
         .status-box {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 20px;
             padding: 15px;
-            margin-bottom: 35px;
+            margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.5s ease;
         }
         
-        /* Estado inicial: Desconectado / Peligro */
         .status-box.unprotected { border-color: rgba(255, 0, 110, 0.3); box-shadow: inset 0 0 15px rgba(255, 0, 110, 0.1); }
-        /* Estado activo: Protegido */
         .status-box.protected { border-color: rgba(0, 210, 255, 0.4); box-shadow: inset 0 0 25px rgba(0, 210, 255, 0.15); }
 
         #status-text { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 5px; }
@@ -82,17 +80,17 @@
            EL BOTÓN CENTRAL DE ENCENDIDO (POWER)
            ========================================== */
         .power-wrapper {
-            margin: 40px 0;
+            margin: 35px 0;
             display: flex;
             justify-content: center;
             position: relative;
         }
 
         .power-btn {
-            width: 140px;
-            height: 140px;
+            width: 135px;
+            height: 135px;
             border-radius: 50%;
-            background: #0f172a;
+            background: #0b111e;
             border: 4px solid #ff006e;
             cursor: pointer;
             display: flex;
@@ -105,14 +103,8 @@
             outline: none;
         }
 
-        .power-btn svg {
-            width: 50px;
-            height: 50px;
-            fill: #ff006e;
-            transition: all 0.5s ease;
-        }
+        .power-btn svg { width: 45px; height: 45px; fill: #ff006e; transition: all 0.5s ease; }
 
-        /* Estados dinámicos por JS */
         .power-btn.connecting {
             border-color: #eab308;
             box-shadow: 0 0 30px rgba(234, 179, 8, 0.4);
@@ -126,18 +118,16 @@
             transform: scale(1.05);
         }
         .power-btn.connected svg { fill: #00d2ff; filter: drop-shadow(0 0 8px #00d2ff); }
-        .power-btn:active { transform: scale(0.95); }
 
         @keyframes pulse-yellow {
             0% { transform: scale(1); opacity: 0.8; }
             100% { transform: scale(1.03); opacity: 1; }
         }
 
-        /* Onda expansiva de carga */
         .pulse-ring {
             position: absolute;
-            width: 140px;
-            height: 140px;
+            width: 135px;
+            height: 135px;
             border-radius: 50%;
             border: 2px solid #00d2ff;
             opacity: 0;
@@ -151,7 +141,7 @@
         }
 
         /* Cronómetro */
-        #timer { font-size: 1.1rem; opacity: 0.4; font-weight: 500; margin-top: -15px; margin-bottom: 30px; font-family: monospace; transition: opacity 0.3s; }
+        #timer { font-size: 1.1rem; opacity: 0.4; font-weight: 500; margin-top: -15px; margin-bottom: 25px; font-family: monospace; }
         #timer.active { opacity: 1; color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.3); }
 
         /* Selector de Ubicación */
@@ -163,7 +153,7 @@
             align-items: center;
             justify-content: space-between;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .location-info { display: flex; align-items: center; gap: 12px; }
@@ -184,24 +174,35 @@
         }
 
         /* Características inferiores (Ping / Servidor) */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 12px; text-align: left; }
+        .stat-card span { display: block; font-size: 0.72rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-card p { font-size: 1rem; font-weight: bold; color: #f4f7f6; }
 
-        .stat-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        /* MEJORA 2 Y 3: CONSOLA DE REGISTROS Y VELOCIDAD */
+        .console-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 210, 255, 0.1);
             border-radius: 15px;
             padding: 12px;
-            transition: all 0.3s;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75rem;
+            height: 70px;
+            overflow-y: hidden;
+            color: #3adef7;
+            line-height: 1.4;
         }
-        .stat-card span { display: block; font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; margin-bottom: 4px; }
-        .stat-card p { font-size: 1.1rem; font-weight: bold; color: #f4f7f6; }
+        .console-line { margin-bottom: 2px; opacity: 0.8; }
+        .console-line.success { color: #10b981; }
+        .console-line.alert { color: #f43f5e; }
     </style>
 </head>
 <body>
+
+    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" preload="auto"></audio>
+    <audio id="snd-connect" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav" preload="auto"></audio>
+    <audio id="snd-success" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-84.wav" preload="auto"></audio>
 
     <div class="vpn-container">
         <header>
@@ -244,13 +245,18 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <span>Latencia (Ping)</span>
+                <span>Latencia / Cifrado</span>
                 <p id="ping-display">145 ms</p>
+                <p id="cipher-display" style="font-size: 0.75rem; font-weight: normal; opacity: 0.6; margin-top: 2px;">AES-0 (Ninguno)</p>
             </div>
             <div class="stat-card">
-                <span>Cifrado</span>
-                <p id="cipher-display">Ninguno (AES-0)</p>
+                <span>Velocidad Bajada</span>
+                <p id="speed-display">0.0 Mbps</p>
             </div>
+        </div>
+
+        <div class="console-box" id="console-log">
+            <div class="console-line">[SISTEMA] Listo para iniciar conexión...</div>
         </div>
     </div>
 
@@ -265,6 +271,7 @@
 
         const IP_REAL = "185.124.74.22";
 
+        // DOM Elements
         const vpnToggle = document.getElementById('vpn-toggle');
         const pulseRing = document.getElementById('pulse');
         const statusCard = document.getElementById('status-card');
@@ -275,7 +282,14 @@
         const countryName = document.getElementById('country-name');
         const pingDisplay = document.getElementById('ping-display');
         const cipherDisplay = document.getElementById('cipher-display');
+        const speedDisplay = document.getElementById('speed-display');
         const timerDisplay = document.getElementById('timer');
+        const consoleLog = document.getElementById('console-log');
+
+        // Audios
+        const sndClick = document.getElementById('snd-click');
+        const sndConnect = document.getElementById('snd-connect');
+        const sndSuccess = document.getElementById('snd-success');
 
         let state = "disconnected"; 
         let timerInterval = null;
@@ -285,10 +299,32 @@
             return `${Math.floor(Math.random() * 220) + 10}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}`;
         }
 
-        function actualizarPingVisual(codigoPais) {
+        // Añade líneas animadas a la consola inferior
+        function printLog(text, type = "") {
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.innerText = `> ${text}`;
+            consoleLog.appendChild(line);
+            consoleLog.scrollTop = consoleLog.scrollHeight; // Auto-scroll abajo
+            
+            // Mantener solo las últimas 3 líneas visibles
+            while (consoleLog.children.length > 3) {
+                consoleLog.removeChild(consoleLog.firstChild);
+            }
+        }
+
+        function actualizarDatosDinamicos(codigoPais) {
             const base = paisesConfig[codigoPais].pingBase;
             const fluctuacion = Math.floor(Math.random() * 11) - 5; 
             pingDisplay.innerText = `${base + fluctuacion} ms`;
+
+            if (state === "connected") {
+                // Simula velocidad variable de bajada tipo 120.4 Mbps
+                const speed = (Math.random() * (450 - 320) + 320).toFixed(1);
+                speedDisplay.innerText = `${speed} Mbps`;
+            } else {
+                speedDisplay.innerText = "0.0 Mbps";
+            }
         }
 
         function startTimer() {
@@ -309,7 +345,7 @@
                 timerDisplay.innerText = `${hrs}:${mins}:${secs}`;
                 
                 if (state === "connected") {
-                    actualizarPingVisual(serverSelect.value);
+                    actualizarDatosDinamicos(serverSelect.value);
                 }
             }, 1000);
         }
@@ -320,12 +356,24 @@
         }
 
         vpnToggle.addEventListener('click', () => {
+            // Reproduce click de sonido
+            sndClick.currentTime = 0;
+            sndClick.play().catch(()=> {/* Evita error si el navegador bloquea audio */});
+
             if (state === "disconnected") {
                 state = "connecting";
-                vpnToggle.classList.add('connecting');
-                statusText.innerText = "Negociando túnel...";
+                vpnToggle.className = "power-btn connecting";
+                statusText.innerText = "Buscando nodo seguro...";
                 statusText.className = ""; 
                 statusText.style.color = "#eab308"; 
+
+                // Efecto de audio de escaneo/conexión
+                sndConnect.currentTime = 0;
+                sndConnect.play().catch(()=>{});
+
+                printLog("Iniciando protocolo Shield...", "alert");
+                setTimeout(() => printLog("Buscando servidores en " + paisesConfig[serverSelect.value].nombre + "..."), 600);
+                setTimeout(() => printLog("Negociando clave de cifrado Diffie-Hellman..."), 1200);
 
                 setTimeout(() => {
                     if (state !== "connecting") return; 
@@ -342,6 +390,13 @@
                     ipDisplay.innerText = generarIpFalsa();
                     cipherDisplay.innerText = "AES-256-GCM (Militar)";
                     
+                    // Sonido de éxito
+                    sndSuccess.currentTime = 0;
+                    sndSuccess.play().catch(()=>{});
+
+                    printLog("TÚNEL ESTABLECIDO CON ÉXITO.", "success");
+                    printLog("Tráfico cifrado de extremo a extremo.", "success");
+                    
                     startTimer();
                 }, 1800); 
 
@@ -356,10 +411,12 @@
                 statusText.style.color = "";
                 
                 ipDisplay.innerText = IP_REAL;
-                cipherDisplay.innerText = "Ninguno (AES-0)";
+                cipherDisplay.innerText = "AES-0 (Ninguno)";
                 
                 stopTimer();
-                actualizarPingVisual(serverSelect.value);
+                actualizarDatosDinamicos(serverSelect.value);
+                printLog("Conexión abortada por el usuario.", "alert");
+                printLog("Tu IP real vuelve a ser pública.", "alert");
             }
         });
 
@@ -369,14 +426,17 @@
 
             countryFlag.innerText = info.bandera;
             countryName.innerText = info.nombre;
-            actualizarPingVisual(codigo);
+            actualizarDatosDinamicos(codigo);
+
+            printLog("Cambiando nodo a: " + info.nombre);
 
             if (state === "connected") {
                 ipDisplay.innerText = generarIpFalsa();
+                printLog("Nueva IP asignada en la región.", "success");
             }
         });
 
-        actualizarPingVisual('us');
+        actualizarDatosDinamicos('us');
     </script>
 </body>
 </html>
